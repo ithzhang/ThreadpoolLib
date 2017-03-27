@@ -1,5 +1,11 @@
 #pragma once
-#include "windows.h"
+
+#include <windows.h>
+
+/** 
+* @class CMyMutex 互斥锁
+* @brief 封装了CRITICAL_SECTION对象的操作方法
+*/
 class CMyMutex
 {
 public:
@@ -11,4 +17,3 @@ public:
 private:
 	CRITICAL_SECTION m_cs;
 };
-

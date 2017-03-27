@@ -1,15 +1,22 @@
 #include "Task.h"
-#include "windows.h"
-CTask::CTask(int id)
-{
-	m_ID=id;
 
+/// 构造函数
+CTask::CTask(int id):m_taskID(id)
+{
 }
+
+/// 析构函数
 CTask::~CTask(void)
 {
 }
 
-int CTask::getID()
+/// 回收内存函数
+void CTask::Destroy() 
 {
-	return m_ID;
+}
+
+/// 获取任务标识
+int CTask::getID()
+{ 
+	return m_taskID; 
 }

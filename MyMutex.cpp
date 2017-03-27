@@ -6,9 +6,9 @@ CMyMutex::CMyMutex(void)
 	InitializeCriticalSection(&m_cs);
 }
 
-
 CMyMutex::~CMyMutex(void)
 {
+	DeleteCriticalSection(&m_cs);
 }
 
 bool CMyMutex::Lock()
