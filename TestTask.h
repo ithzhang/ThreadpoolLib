@@ -8,5 +8,6 @@ public:
 	~CTestTask(void);
 public:
 	virtual void taskProc();
+	virtual void Destroy() { delete this; }
 };
 
