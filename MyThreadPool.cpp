@@ -3,7 +3,6 @@
 #include "Task.h"
 #include<cassert>
 #include<iostream>
-#include "MyQueue.h"
 
 /**
 * @brief 构造一个容量确定的线程池
@@ -21,6 +20,7 @@ CMyThreadPool::CMyThreadPool(int num)
 	}
 }
 
+/// 默认析构函数
 CMyThreadPool::~CMyThreadPool(void)
 {
 }
@@ -44,7 +44,7 @@ bool CMyThreadPool::SwitchActiveThread( CMyThread *pThread)
 	CTask *pTask = NULL;
 	if(pTask = m_TaskQueue.pop())//任务队列不为空,继续取任务执行
 	{
-		printf("线程【%d】执行%d\n", pThread->m_threadID, pTask->getID());
+		// printf("线程【%d】执行%d\n", pThread->m_threadID, pTask->getID());
 
 		pThread->assignTask(pTask);
 		pThread->startTask();
@@ -68,7 +68,7 @@ bool CMyThreadPool::addTask( CTask *t, PRIORITY priority )
 	if(!t || m_bIsExit)
 		return false;	
 	CTask *task = NULL;
-	printf("添加任务%d\n", t->getID());
+	// printf("添加任务%d\n", t->getID());
 	if(priority == PRIORITY::NORMAL)
 	{
 		m_TaskQueue.push(t);//进入任务队列
@@ -87,7 +87,7 @@ bool CMyThreadPool::addTask( CTask *t, PRIORITY priority )
 			return 0;
 		}
 		CMyThread *pThread = PopIdleThread();
-		printf("线程【%d】执行%d\n", pThread->m_threadID, task->getID());
+		// printf("线程【%d】执行%d\n", pThread->m_threadID, task->getID());
 		m_ActiveThreadList.addThread(pThread);
 		pThread->assignTask(task);
 		pThread->startTask();
@@ -108,7 +108,6 @@ bool CMyThreadPool::start()
 */
 bool CMyThreadPool::destroyThreadPool()
 {
-
 	m_bIsExit = true;
 	m_TaskQueue.clear();
 	m_IdleThreadStack.clear();

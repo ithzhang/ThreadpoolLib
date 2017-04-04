@@ -1,18 +1,10 @@
 #include "MyQueue.h"
 #include"task.h"
 
-CMyQueue::CMyQueue(void)
-{
-}
-
-
-CMyQueue::~CMyQueue(void)
-{
-}
-
 /**
 * @brief 取出队首任务
 * @remark 当队列为空时pop为NULL
+* @return CTask*
 */
 CTask* CMyQueue::pop()
 {
@@ -31,6 +23,8 @@ CTask* CMyQueue::pop()
 * @brief 向队尾加入一个任务
 * @param[in] *t 任务指针
 * @remark 当指针为空时失败
+* @return 任务非空时返回true
+* @retval bool
 */
 bool CMyQueue::push(CTask *t)
 {

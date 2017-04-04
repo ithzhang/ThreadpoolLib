@@ -1,25 +1,26 @@
 #include <iostream>
 #include "MyThreadPool.h"
 #include "MyThread.h"
-#include"TestTask.h"
+#include "MyTask.h"
+#include <vector>
 
 int main(int argc,char**argv)
 {
-	CTestTask *p = NULL;
+	CMyTask *p = NULL;
 	CMyThreadPool threadpool(10);
 	for(int i = 0; i < 100; i++)
 	{
- 		p = new CTestTask(i);
+ 		p = new CMyTask(i);
 		threadpool.addTask(p, PRIORITY::NORMAL);
 	}
-	p = new CTestTask(102200);
+	p = new CMyTask(1000000);
 	threadpool.addTask(p, PRIORITY::HIGH);
 	
-	//主线程执行其他工作
-	{
-		Sleep(1000 * 20);
-	}
+	// 主线程执行其他工作
+	Sleep(1000 * 20);
 	threadpool.destroyThreadPool();
+
+	system("pause");
 
 	return 0;
 }

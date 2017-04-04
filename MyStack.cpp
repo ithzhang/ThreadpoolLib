@@ -2,14 +2,6 @@
 #include<cassert>
 #include"MyThread.h"
 
-CMyStack::CMyStack(void)
-{
-}
-
-CMyStack::~CMyStack(void)
-{
-}
-
 /**
 * @brief 取出线程栈顶部的一个线程
 * @return 线程指针

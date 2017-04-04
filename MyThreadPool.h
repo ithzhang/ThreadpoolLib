@@ -1,7 +1,10 @@
+/** 
+* @file MyThreadPool.h
+* @brief 我的线程池
+*/
+
 #pragma once
 
-#include<list>
-#include "MyMutex.h"
 #include "MyStack.h"
 #include "MyList.h"
 #include"MyQueue.h"
@@ -10,26 +13,30 @@ class CMyThread;
 class CTask;
 
 /** 
-* @enum PRIORITY 任务优先级 
+* @enum PRIORITY 
+* @brief 任务优先级 
 */
 enum PRIORITY
 {
-	NORMAL,
-	HIGH
+	NORMAL,			/**< 正常优先级 */
+	HIGH			/**< 高优先级 */
 };
 
 /** 
-* @class CBaseThreadPool 线程池基类
+* @class CBaseThreadPool 
+* @brief 线程池基类
 */
 class CBaseThreadPool
 {
 public:
+	/// 纯虚函数：切换活动线程
 	virtual bool SwitchActiveThread(CMyThread *ptd) = 0;
 };
 
 /**
-* @class CMyThreadPool 线程池
-* 线程池包含三个要素：空闲线程栈、活动线程链表、任务队列
+* @class CMyThreadPool 
+* @brief 线程池
+* @details 线程池包含三个要素：空闲线程栈、活动线程链表、任务队列
 */
 class CMyThreadPool : public CBaseThreadPool
 {
@@ -48,7 +55,7 @@ public:
 	/// 销毁线程池
 	bool destroyThreadPool();
 	/// 获取活动线程个数
-	int GetActiveThreadNum() { return m_ActiveThreadList.getSize(); }
+	inline int GetActiveThreadNum() { return m_ActiveThreadList.getSize(); }
 
 private:
 	/// 线程池容量

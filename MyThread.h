@@ -1,24 +1,47 @@
+/** 
+* @file MyThread.h
+* @brief 我的线程
+*/
+
 #pragma once
+#include <cassert>
 #include <windows.h>
 
 class CTask;
 class CBaseThreadPool;
 
 /**
-* @class CMyThread 线程类
+* @class CMyThread 
+* @brief 线程类
 */
 class CMyThread
 {
 public:
 	CMyThread(CBaseThreadPool *threadPool);
-	~CMyThread(void);
+	~CMyThread();
 
-public:
-	bool startThread();
-	bool suspendThread();
-	bool resumeThread();
-	bool assignTask(CTask *pTask);
-	bool startTask();
+	/// 挂起线程
+	inline void suspendThread() { ResetEvent(m_hEvent); }
+	/// 有任务到来，通知线程继续执行
+	inline void resumeThread() { SetEvent(m_hEvent); }
+	/// 开始执行任务
+	inline void startTask() { resumeThread(); }
+
+	/// 将任务关联到线程类
+	inline bool assignTask(CTask *pTask)
+	{
+		assert(pTask);
+		m_pTask = pTask;
+		return (NULL == pTask) ? false : true;
+	}
+	/// 开始线程
+	inline bool startThread()
+	{
+		m_hThread = CreateThread(0, 0, threadProc, this, 0, &m_threadID);
+		return (INVALID_HANDLE_VALUE == m_hThread) ? false : true;
+	}
+
+	/// 线程处理函数
 	static DWORD WINAPI threadProc(LPVOID pParam);
 
 	/// 线程ID

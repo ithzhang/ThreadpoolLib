@@ -2,18 +2,11 @@
 #include <cassert>
 #include"MyThread.h"
 
-CMyList::CMyList(void)
-{
-}
-
-
-CMyList::~CMyList(void)
-{
-}
-
 /**
 * @brief 向线程列表添加一个线程
 * @param[in] *t 线程指针
+* @return 成功返回true，t为空时返回false
+* @retval bool
 */
 bool CMyList::addThread(CMyThread *t)
 {
@@ -27,8 +20,10 @@ bool CMyList::addThread(CMyThread *t)
 }
 
 /**
-* @brief 向线程列表移除一个线程(未delete)
+* @brief 向线程列表移除一个线程(只移除，不delete)
 * @param[in] *t 线程指针
+* @return 成功返回true，t为空时返回false
+* @retval bool
 */
 bool CMyList::removeThread(CMyThread *t)
 {
@@ -44,6 +39,7 @@ bool CMyList::removeThread(CMyThread *t)
 /**
 * @brief 获取线程列表的大小
 * @return 线程个数
+* @retval int
 */
 int CMyList::getSize()
 {
@@ -56,6 +52,7 @@ int CMyList::getSize()
 /**
 * @brief 判断线程列表是否为空
 * @return 列表为空时返回true
+* @retval bool
 */
 bool CMyList::isEmpty()
 {
@@ -67,6 +64,8 @@ bool CMyList::isEmpty()
 
 /**
 * @brief 删除线程列表中的线程(delete指针)
+* @return true
+* @retval bool
 */
 bool CMyList::clear()
 {

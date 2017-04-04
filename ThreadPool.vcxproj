@@ -66,10 +66,10 @@
     <ClInclude Include="MyMutex.h" />
     <ClInclude Include="MyQueue.h" />
     <ClInclude Include="MyStack.h" />
+    <ClInclude Include="MyTask.h" />
     <ClInclude Include="MyThread.h" />
     <ClInclude Include="MyThreadPool.h" />
     <ClInclude Include="Task.h" />
-    <ClInclude Include="TestTask.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -77,10 +77,10 @@
     <ClCompile Include="MyMutex.cpp" />
     <ClCompile Include="MyQueue.cpp" />
     <ClCompile Include="MyStack.cpp" />
+    <ClCompile Include="MyTask.cpp" />
     <ClCompile Include="MyThread.cpp" />
     <ClCompile Include="MyThreadPool.cpp" />
     <ClCompile Include="Task.cpp" />
-    <ClCompile Include="TestTask.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

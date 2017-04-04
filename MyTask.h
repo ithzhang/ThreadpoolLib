@@ -1,8 +1,14 @@
+/** 
+* @file MyTask.h
+* @brief 任务实例
+*/
+
 #pragma once
 #include "task.h"
 
 /**
-* @class CDetectTask 任务
+* @class CMyTask 
+* @brief 项目ThreadPool的任务实例
 */
 class CMyTask : public CTask
 {
