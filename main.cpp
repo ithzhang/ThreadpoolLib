@@ -17,7 +17,10 @@ int main(int argc,char**argv)
 	threadpool.addTask(p, PRIORITY::HIGH);
 	
 	// 主线程执行其他工作
-	Sleep(1000 * 20);
+	while (threadpool.GetActiveThreadNum())
+	{
+		Sleep(10);
+	}
 	threadpool.destroyThreadPool();
 
 	system("pause");
