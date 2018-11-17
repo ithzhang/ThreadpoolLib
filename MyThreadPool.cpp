@@ -1,38 +1,96 @@
+#include "stdafx.h"
 #include "MyThreadPool.h"
-#include "MyThread.h"
 #include "Task.h"
 #include<cassert>
 #include<iostream>
+#include <process.h>
+
+// 全局唯一的线程池变量
+CMyThreadPool g_ThreadPool(4);
+
+#ifndef WAIT
+// 以步长n毫秒在条件C下等待T秒(n是步长，必须能整除1000；条件改变时就不等待, T >= 0.01)
+#define WAIT_n(C, T, n) {assert(!(1000%(n)));int s=(1000*(T))/(n);do{Sleep(n);}while((C)&&(--s));}
+// 在条件C成立时等待T秒(步长10ms)
+#define WAIT(C, T) WAIT_n(C, T, 10)
+#endif
+
+// 线程池线程个数动态管理
+UINT WINAPI ThreadPoolMgr(LPVOID param)
+{
+	CMyThreadPool *p = (CMyThreadPool *)param;
+	p->SetMgrThreadState(true);
+	const bool& g_bExit = p->IsExit();
+	int idleNum = 0, n = 0;
+	do
+	{
+		idleNum += p->GetIdleThreadNum();
+		WAIT_n(!g_bExit, POOL_STEP, 50);
+		if(++n == POOL_TIMES){
+			idleNum /= n;
+			if (idleNum){
+				int s = p->GetThreadNum() - idleNum;
+				s = max(p->MinPoolSize(), s);
+				p->ChangeSize(s);
+			}
+			n = 0; idleNum = 0;
+		}
+	}while(false == g_bExit);
+	p->SetMgrThreadState(false);
+	return 0xDEAD;
+}
 
 /**
 * @brief 构造一个容量确定的线程池
-* @param[in] num 线程池容量
+* @param[in] nDefaultSize 线程池默认容量(最小容量)
 */
-CMyThreadPool::CMyThreadPool(int num)
+CMyThreadPool::CMyThreadPool(int nDefaultSize, bool autoMgr)
 {
-	m_nThreadNum = num;
+	m_nThreadNum = nDefaultSize;
+	m_nMinSize = nDefaultSize;
 	m_bIsExit = false;
-	for(int i = 0; i < num; i++)
+	for(int i = 0; i < nDefaultSize; ++i)
 	{
 		CMyThread *p = new CMyThread(this);
 		m_IdleThreadStack.push(p);
 		p->startThread();
+	}
+	m_bThreadState = false;
+	if (autoMgr)
+	{
+		HANDLE h = (HANDLE)_beginthreadex(NULL, 0, &ThreadPoolMgr, this, 0, NULL);
+		CloseHandle(h);
 	}
 }
 
 /// 默认析构函数
 CMyThreadPool::~CMyThreadPool(void)
 {
+	Wait(10);
+	destroyThreadPool();
 }
 
 /**
-* @brief 从空闲线程栈取出一个线程
-* @return 栈顶空闲线程
+* @brief 改变线程池的大小
+* @return nSize 线程池大小
 */
-CMyThread* CMyThreadPool::PopIdleThread()
+void CMyThreadPool::ChangeSize(int nSize)
 {
-	CMyThread *pThread = m_IdleThreadStack.pop();
-	return pThread;
+	m_mutex.Lock();
+	int n = m_nThreadNum;
+	if (nSize > m_nThreadNum)
+	{
+		while (nSize > m_nThreadNum) AddThread();
+		printf("[WARNING] 线程池空闲线程不足, 请考虑增加线程."
+			"======> %d -> %d\n", n, m_nThreadNum);
+	}
+	else if (nSize < m_nThreadNum)
+	{
+		while (nSize < m_nThreadNum) SubtractThread();
+		printf("[INFO] 线程池空闲线程较多, 请考虑释放线程."
+			"======> %d -> %d\n", n, m_nThreadNum);
+	}
+	m_mutex.Unlock();
 }
 
 /** 
@@ -42,10 +100,9 @@ CMyThread* CMyThreadPool::PopIdleThread()
 bool CMyThreadPool::SwitchActiveThread( CMyThread *pThread)
 {
 	CTask *pTask = NULL;
+	m_mutex.Lock();
 	if(pTask = m_TaskQueue.pop())//任务队列不为空,继续取任务执行
 	{
-		// printf("线程【%d】执行%d\n", pThread->m_threadID, pTask->getID());
-
 		pThread->assignTask(pTask);
 		pThread->startTask();
 	}
@@ -54,6 +111,7 @@ bool CMyThreadPool::SwitchActiveThread( CMyThread *pThread)
 		m_ActiveThreadList.removeThread(pThread);
 		m_IdleThreadStack.push(pThread);
 	}
+	m_mutex.Unlock();
 	return true;
 }
 
@@ -62,13 +120,13 @@ bool CMyThreadPool::SwitchActiveThread( CMyThread *pThread)
 * @param[in] *t 任务(指针)
 * @param[in] priority 优先级,高优先级的任务将被插入到队首.
 */
-bool CMyThreadPool::addTask( CTask *t, PRIORITY priority )
+void CMyThreadPool::addTask( CTask *t, PRIORITY priority )
 {
 	assert(t);
 	if(!t || m_bIsExit)
-		return false;	
+		return;
 	CTask *task = NULL;
-	// printf("添加任务%d\n", t->getID());
+	m_mutex.Lock();
 	if(priority == PRIORITY::NORMAL)
 	{
 		m_TaskQueue.push(t);//进入任务队列
@@ -80,37 +138,29 @@ bool CMyThreadPool::addTask( CTask *t, PRIORITY priority )
 
 	if(!m_IdleThreadStack.isEmpty())//存在空闲线程,调用空闲线程处理任务
 	{
-		task = m_TaskQueue.pop();//取出列头任务
-		if(task == NULL)
+		if(task = m_TaskQueue.pop())//取出列头任务
 		{
-			// 任务取出出错
-			return 0;
+			CMyThread *pThread = m_IdleThreadStack.pop();
+			m_ActiveThreadList.addThread(pThread);
+			pThread->assignTask(task);
+			pThread->startTask();
 		}
-		CMyThread *pThread = PopIdleThread();
-		// printf("线程【%d】执行%d\n", pThread->m_threadID, task->getID());
-		m_ActiveThreadList.addThread(pThread);
-		pThread->assignTask(task);
-		pThread->startTask();
 	}
-	return true;
-}
-
-/**
-* @brief 开始调度
-*/
-bool CMyThreadPool::start()
-{
-	return 0;
+	m_mutex.Unlock();
 }
 
 /**
 * @brief 销毁线程池
+* @details clear m_TaskQueue，m_ActiveThreadList，m_IdleThreadStack
 */
-bool CMyThreadPool::destroyThreadPool()
+void CMyThreadPool::destroyThreadPool()
 {
+	m_mutex.Lock();
 	m_bIsExit = true;
 	m_TaskQueue.clear();
-	m_IdleThreadStack.clear();
 	m_ActiveThreadList.clear();
-	return true;
+	m_IdleThreadStack.clear();
+	m_mutex.Unlock();
+	while(m_bThreadState)
+		Sleep(10);
 }

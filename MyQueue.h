@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#include<deque>
-#include"MyMutex.h"
+#include <deque>
+#include <assert.h>
 
 class CTask;
 
@@ -22,14 +22,32 @@ public:
 	~CMyQueue() { }
 
 public:
-	CTask* pop();
-	bool push(CTask *t);
-	bool pushFront(CTask *t);//插到队首
-	bool isEmpty();
-	bool clear();
+
+	// 取出队首任务
+	inline CTask* pop()
+	{
+		CTask *p = NULL;
+		if(!m_TaskQueue.empty())
+		{
+			p = m_TaskQueue.front();
+			m_TaskQueue.pop_front();
+		}
+		return p;
+	}
+
+	// 向队尾加入一个任务
+	inline void push(CTask *t) { assert(t); m_TaskQueue.push_back(t); }
+
+	// 向队首添加一个任务
+	inline void pushFront(CTask *t) { assert(t); m_TaskQueue.push_front(t); }
+
+	// 判断任务队列是否为空
+	inline bool isEmpty() const { return m_TaskQueue.empty(); }
+	
+	// 清除任务队列
+	inline void clear() { m_TaskQueue.clear(); }
+
 private:
 	/// 任务队列
 	std::deque<CTask*> m_TaskQueue;
-	/// 互斥锁
-	CMyMutex m_mutex;
 };

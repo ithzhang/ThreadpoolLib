@@ -1,10 +1,13 @@
+#include "stdafx.h"
 #include "MyTask.h"
 
 /**
 * @brief 构造一个任务
-* @param[in] id 任务编号
+* @param[in] cb			线程函数
+* @param[in] param		线程参数
+* @param[in] id			线程任务编号
 */
-CMyTask::CMyTask(int id):CTask(id)
+CMyTask::CMyTask(StartAddress cb, void *param, int id): CTask(id), m_param(param), m_Callback(cb)
 {
 }
 
@@ -22,12 +25,5 @@ void CMyTask::Destroy()
 /// CMyTask重载的任务执行函数
 void CMyTask::taskProc()
 {
-	for(int i=0;i<10000;i++)
-	{
-		for(int j=0;j<10000;j++)
-		{
-			int temp=1;
-			temp++;
-		}
-	}
+	unsigned s = m_Callback(m_param);
 }
