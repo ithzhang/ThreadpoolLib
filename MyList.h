@@ -7,10 +7,12 @@
 #include <list>
 #include "MyThread.h"
 
+// 线程列表
+typedef std::list<CMyThread*> ThreadList;
 
 /**
 * @class CMyList 
-* @brief 线程线程列表存放了CMyThread指针
+* @brief 线程列表封装了对ThreadList的操作方法
 */
 class CMyList
 {
@@ -38,13 +40,12 @@ public:
 	// 删除线程列表中的线程(移除，并delete指针)
 	inline void CMyList::clear()
 	{
-		std::list<CMyThread*>::iterator iter = m_list.begin();
-		for(; iter != m_list.end(); ++iter)
+		for(ThreadList::const_iterator iter = m_list.begin(); iter != m_list.end(); ++iter)
 			(*iter)->Exit();
 		m_list.clear();
 	}
 
 private:
 	/// 线程列表
-	std::list<CMyThread*> m_list;
+	ThreadList m_list;
 };

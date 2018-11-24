@@ -4,15 +4,13 @@
 #include "MyTask.h"
 #include <vector>
 
-extern CMyThreadPool g_ThreadPool;
-
 class test
 {
 private:
 	int s;
 
 public:
-	test(int a) { s = a; g_ThreadPool.addTask(new CMyTask(taskProc, this, a)); }
+	test(int a) { s = a; AddTask(taskProc, this); }
 
 	void add(int a) { s += a; }
 
@@ -36,9 +34,6 @@ int main(int argc,char**argv)
 	{
 		test *T1 = new test(i);
 	}
-
-	// 主线程执行其他工作
-	g_ThreadPool.Wait(10);
 
 	system("pause");
 

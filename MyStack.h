@@ -7,6 +7,8 @@
 #include<stack>
 #include "MyThread.h"
 
+// 空闲线程栈
+typedef std::stack<CMyThread*> IdleThread;
 
 /**
 * @class CMyStack 
@@ -53,6 +55,6 @@ public:
 	}
 
 private:
-	/// 任务栈
-	std::stack<CMyThread*> m_stack;
+	/// 空闲线程栈
+	IdleThread m_stack;
 };

@@ -1,29 +1,10 @@
 #include "stdafx.h"
 #include "MyThread.h"
-#include "task.h"
+#include "MyTask.h"
 #include "MyThreadPool.h"
 
 // 退出代码
 #define EXIT_CODE (0xDEAD)
-
-/**
-* @brief 在线程池里构造一个线程
-* @param[in] *threadPool 线程池指针
-*/
-CMyThread::CMyThread(CBaseThreadPool *threadPool)
-{
-	m_pTask = NULL;
-	m_pThreadPool = threadPool;
-	m_hEvent = CreateEvent(NULL, false, false, NULL);
-	m_bIsExit = false;
-}
-
-/// 关闭事件及线程句柄
-CMyThread::~CMyThread()
-{
-	CloseHandle(m_hEvent);
-	CloseHandle(m_hThread);
-}
 
 /// 线程执行函数
 DWORD WINAPI CMyThread::threadProc(LPVOID pParam)

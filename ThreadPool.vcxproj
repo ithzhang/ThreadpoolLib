@@ -20,14 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MyList.cpp" />
-    <ClCompile Include="MyMutex.cpp" />
-    <ClCompile Include="MyQueue.cpp" />
-    <ClCompile Include="MyStack.cpp" />
     <ClCompile Include="MyThread.cpp" />
     <ClCompile Include="MyThreadPool.cpp" />
-    <ClCompile Include="Task.cpp" />
-    <ClCompile Include="MyTask.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyList.h" />
@@ -37,7 +31,6 @@
     <ClInclude Include="MyThread.h" />
     <ClInclude Include="MyThreadPool.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="Task.h" />
     <ClInclude Include="MyTask.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

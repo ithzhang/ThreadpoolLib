@@ -18,28 +18,10 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="MyList.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="MyMutex.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="MyQueue.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="MyStack.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="MyThread.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="MyThreadPool.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Task.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="MyTask.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -60,9 +42,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="MyThreadPool.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Task.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="MyTask.h">

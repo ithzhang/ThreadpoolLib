@@ -7,7 +7,10 @@
 #include <deque>
 #include <assert.h>
 
-class CTask;
+class CMyTask;
+
+// 任务队列
+typedef std::deque<CMyTask*> TaskQueue;
 
 /**
 * @class CMyQueue 
@@ -24,9 +27,9 @@ public:
 public:
 
 	// 取出队首任务
-	inline CTask* pop()
+	inline CMyTask* pop()
 	{
-		CTask *p = NULL;
+		CMyTask *p = NULL;
 		if(!m_TaskQueue.empty())
 		{
 			p = m_TaskQueue.front();
@@ -36,18 +39,18 @@ public:
 	}
 
 	// 向队尾加入一个任务
-	inline void push(CTask *t) { assert(t); m_TaskQueue.push_back(t); }
+	inline void push(CMyTask *t) { assert(t); m_TaskQueue.push_back(t); }
 
 	// 向队首添加一个任务
-	inline void pushFront(CTask *t) { assert(t); m_TaskQueue.push_front(t); }
+	inline void pushFront(CMyTask *t) { assert(t); m_TaskQueue.push_front(t); }
 
 	// 判断任务队列是否为空
 	inline bool isEmpty() const { return m_TaskQueue.empty(); }
 	
-	// 清除任务队列
+	// 清空任务队列
 	inline void clear() { m_TaskQueue.clear(); }
 
 private:
 	/// 任务队列
-	std::deque<CTask*> m_TaskQueue;
+	TaskQueue m_TaskQueue;
 };

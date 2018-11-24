@@ -12,8 +12,6 @@
 #include "MyMutex.h"
 #include "MyTask.h"
 
-class CTask;
-
 #pragma warning(disable : 4482)
 
 /** 
@@ -33,8 +31,8 @@ enum PRIORITY
 class CBaseThreadPool
 {
 public:
-	/// 纯虚函数：切换活动线程
-	virtual bool SwitchActiveThread(CMyThread *ptd) = 0;
+	/// 纯虚函数：调度活动线程
+	virtual void SwitchActiveThread(CMyThread *ptd) = 0;
 };
 
 /**
@@ -52,11 +50,11 @@ public:
 
 private:
 	/// 切换活动线程
-	virtual bool SwitchActiveThread(CMyThread* pThread);
+	virtual void SwitchActiveThread(CMyThread* pThread);
 
 public:
 	/// 添加任务到线程池
-	void addTask(CTask *t, PRIORITY priority = PRIORITY::NORMAL);
+	void addTask(CMyTask *t, PRIORITY priority = PRIORITY::NORMAL);
 	/// 开始调度
 	bool start() { return /* 当前不可用 */ 0; }
 	/// 销毁线程池
@@ -75,6 +73,7 @@ public:
 	inline void SetMgrThreadState(bool s) { m_bThreadState = s; }
 	/// 线程池是否将销毁
 	inline const bool& IsExit() const { return m_bIsExit; }
+	/// 获取线程池最小容量
 	inline int MinPoolSize() const { return m_nMinSize; }
 private:
 	/// 线程池当前容量
@@ -85,6 +84,7 @@ private:
 	bool m_bIsExit;
 	/// 管理线程的状态
 	bool m_bThreadState;
+
 	/// 任务锁(增加任务与切换任务时)
 	CMyMutex m_mutex;
 
@@ -122,24 +122,21 @@ private:
 // 全局唯一的线程池，根据实际情况自动调整 (2018-9-29 by 袁沅祥)
 extern CMyThreadPool g_ThreadPool;
 
-inline uintptr_t __cdecl _Beginthreadex(void * _Security, unsigned _StackSize,
-										StartAddress Callback, void * _ArgList, 
-										unsigned _InitFlag, unsigned * _ThrdAddr)
-{
-	if (0 == g_ThreadPool.GetIdleThreadNum())
-		g_ThreadPool.ChangeSize(g_ThreadPool.GetThreadNum() * 2);
-
-	g_ThreadPool.addTask(new CMyTask(Callback, _ArgList, 0));
-	return 0xDEADDEAD;
-}
-
 // 添加一个暂时性任务
 inline void AddTask(StartAddress Callback, void * _ArgList)
 {
 	if (0 == g_ThreadPool.GetIdleThreadNum())
 		g_ThreadPool.ChangeSize(g_ThreadPool.GetThreadNum() * 2);
 
-	g_ThreadPool.addTask(new CMyTask(Callback, _ArgList, 0));
+	return g_ThreadPool.addTask(new CMyTask(Callback, _ArgList));
+}
+
+// 替代_beginthreadex函数
+inline void _Beginthreadex(void * _Security, unsigned _StackSize,
+						   StartAddress Callback, void * _ArgList, 
+						   unsigned _InitFlag, unsigned * _ThrdAddr)
+{
+	return AddTask(Callback, _ArgList);
 }
 
 #ifdef _DEBUG

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "MyThreadPool.h"
-#include "Task.h"
+#include "MyTask.h"
 #include<cassert>
 #include<iostream>
 #include <process.h>
@@ -37,12 +37,13 @@ UINT WINAPI ThreadPoolMgr(LPVOID param)
 		}
 	}while(false == g_bExit);
 	p->SetMgrThreadState(false);
-	return 0xDEAD;
+	return 0xDEAD777;
 }
 
 /**
 * @brief 构造一个容量确定的线程池
 * @param[in] nDefaultSize 线程池默认容量(最小容量)
+* @param[in] autoMgr 是否开启自动管理
 */
 CMyThreadPool::CMyThreadPool(int nDefaultSize, bool autoMgr)
 {
@@ -97,9 +98,9 @@ void CMyThreadPool::ChangeSize(int nSize)
 * @brief 将线程从活动队列取出，放入空闲线程栈中.在取之前判断此时任务队列是否有任务.
 * 如任务队列为空时才挂起,否则从任务队列取任务继续执行.
 */
-bool CMyThreadPool::SwitchActiveThread( CMyThread *pThread)
+void CMyThreadPool::SwitchActiveThread(CMyThread *pThread)
 {
-	CTask *pTask = NULL;
+	CMyTask *pTask = NULL;
 	m_mutex.Lock();
 	if(pTask = m_TaskQueue.pop())//任务队列不为空,继续取任务执行
 	{
@@ -112,7 +113,6 @@ bool CMyThreadPool::SwitchActiveThread( CMyThread *pThread)
 		m_IdleThreadStack.push(pThread);
 	}
 	m_mutex.Unlock();
-	return true;
 }
 
 /**
@@ -120,12 +120,11 @@ bool CMyThreadPool::SwitchActiveThread( CMyThread *pThread)
 * @param[in] *t 任务(指针)
 * @param[in] priority 优先级,高优先级的任务将被插入到队首.
 */
-void CMyThreadPool::addTask( CTask *t, PRIORITY priority )
+void CMyThreadPool::addTask( CMyTask *t, PRIORITY priority )
 {
-	assert(t);
-	if(!t || m_bIsExit)
+	if(m_bIsExit)
 		return;
-	CTask *task = NULL;
+	CMyTask *task = NULL;
 	m_mutex.Lock();
 	if(priority == PRIORITY::NORMAL)
 	{
