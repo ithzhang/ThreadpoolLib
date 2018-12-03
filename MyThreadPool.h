@@ -95,8 +95,8 @@ private:
 	/// 任务队列(存放new出来的任务指针)
 	CMyQueue m_TaskQueue;
 
-	/// 从线程池里减少一个线程（返回当前线程数）
-	inline int SubtractThread()
+	/// 从线程池里减少一个线程（返回成功与否）
+	inline bool SubtractThread()
 	{
 		CMyThread *pThread = m_IdleThreadStack.pop();
 		if (pThread)
@@ -104,7 +104,7 @@ private:
 			pThread->Exit();
 			-- m_nThreadNum;
 		}
-		return m_nThreadNum;
+		return pThread;
 	}
 
 	/// 向线程池里添加一个线程（返回当前线程数）

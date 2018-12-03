@@ -87,7 +87,7 @@ void CMyThreadPool::ChangeSize(int nSize)
 	}
 	else if (nSize < m_nThreadNum)
 	{
-		while (nSize < m_nThreadNum) SubtractThread();
+		while (nSize < m_nThreadNum && SubtractThread());
 		printf("[INFO] 线程池空闲线程较多, 请考虑释放线程."
 			"======> %d -> %d\n", n, m_nThreadNum);
 	}
