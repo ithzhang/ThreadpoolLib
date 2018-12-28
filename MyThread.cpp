@@ -1,77 +1,39 @@
+#include "stdafx.h"
 #include "MyThread.h"
-#include"task.h"
+#include "MyTask.h"
 #include "MyThreadPool.h"
-#include<cassert>
-#define WAIT_TIME 20
-CMyThread::CMyThread(CBaseThreadPool*threadPool)
-{
-	m_pTask=NULL;
-	//m_bIsActive=false;
-	m_pThreadPool=threadPool;
-	m_hEvent=CreateEvent(NULL,false,false,NULL);
-	m_bIsExit=false;
-}
 
-//bool CMyThread::m_bIsActive=false;
-CMyThread::~CMyThread(void)
-{
-	CloseHandle(m_hEvent);
-	CloseHandle(m_hThread);
-}
+// 退出代码
+#define EXIT_CODE (0xDEAD)
 
-bool CMyThread::startThread()
+/// 线程执行函数
+DWORD WINAPI CMyThread::threadProc(LPVOID pParam)
 {
-	m_hThread=CreateThread(0,0,threadProc,this,0,&m_threadID);
-	if(m_hThread==INVALID_HANDLE_VALUE)
+	CMyThread *pThread = (CMyThread*)pParam;
+	DWORD ret = 1; // 线程初次启动时挂起
+	do // 当线程未退出时循环等待执行任务
 	{
-		return false;
-	}
-	return true;
-}
-bool CMyThread::suspendThread()
-{
-	ResetEvent(m_hEvent);
-	return true;
-}
-//有任务到来，通知线程继续执行。
-bool CMyThread::resumeThread()
-{
-	SetEvent(m_hEvent);
-	return true;
-}
-
-DWORD WINAPI CMyThread::threadProc( LPVOID pParam )
-{
-	CMyThread *pThread=(CMyThread*)pParam;
-	while(!pThread->m_bIsExit)
-	{
- 		DWORD ret=WaitForSingleObject(pThread->m_hEvent,INFINITE);
-		if(ret==WAIT_OBJECT_0)
+		if(ret == WAIT_OBJECT_0)// 0
 		{
 			if(pThread->m_pTask)
 			{
-				pThread->m_pTask->taskProc();//执行任务。
-				//delete pThread->m_pTask;//用户传入的空间交由用户处理，内部不处理。如从CTask从堆栈分配，此处会有问题。
-				pThread->m_pTask=NULL;
+				pThread->m_pTask->taskProc();// 执行任务
+				pThread->m_pTask->Destroy();
+				pThread->m_pTask = NULL;
 				pThread->m_pThreadPool->SwitchActiveThread(pThread);
 			}
 		}
-	}
-	return 0;
-}
-//将任务关联到线程类。
-bool CMyThread::assignTask( CTask*pTask )
-{
-	assert(pTask);
-	if(!pTask)
-		return false;
-	m_pTask=pTask;
-	
-	return true;
-}
-//开始执行任务。
-bool CMyThread::startTask()
-{
-	resumeThread();
-	return true;
+		// 等待任务
+		ret = WaitForSingleObject(pThread->m_hEvent, INFINITE);
+	}while(!pThread->m_bIsExit);
+	pThread->Delete();
+	pThread = NULL;
+
+	// OpenCV3配合OpenCL使用时在线程退出时遇到问题，在throw.cpp第152行中断
+	// 这里等待主线程完成其他清理工作，由进程退出
+#if defined(USING_OCL) && OPENCV_VERSION > 2
+	Sleep(INFINITE);
+#endif
+
+	return EXIT_CODE;
 }

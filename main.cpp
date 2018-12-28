@@ -1,23 +1,41 @@
 #include <iostream>
 #include "MyThreadPool.h"
 #include "MyThread.h"
-#include"TestTask.h"
+#include "MyTask.h"
+#include <vector>
+
+class test
+{
+private:
+	int s;
+
+public:
+	test(int a) { s = a; AddTask(taskProc, this); }
+
+	void add(int a) { s += a; }
+
+	int get() const { return s; }
+
+	void destroy() { delete this; }
+
+	static unsigned WINAPI taskProc(void *param)
+	{
+		test *p = (test *) param;
+		printf("[%d]线程执行.\n", p->get());
+		p->add(100);
+		p->destroy();
+		return 0;
+	}
+};
+
 int main(int argc,char**argv)
 {
-	CTestTask*p=NULL;
-	CMyThreadPool threadpool(10);
-	for(int i=0;i<100;i++)
+	for(int i = 0; i < 100; i++)
 	{
- 		p=new CTestTask(i);
-		threadpool.addTask(p,PRIORITY::NORMAL);
+		test *T1 = new test(i);
 	}
-	p=new CTestTask(102200);
-	threadpool.addTask(p,PRIORITY::HIGH);
-	//threadpool.destroyThreadPool();
-	//主线程执行其他工作。
-	{
-		Sleep(1000*1000);
-	}
-	
+
+	system("pause");
+
 	return 0;
 }
